@@ -1,0 +1,53 @@
+# Information Definitions
+# Define custom information types that can be stored for each player
+# 
+# Format:
+# information_name:
+#   type: <int|string|uuid|enum|ladder|permission>
+#   default: <default_value>
+#   # Additional type-specific options:
+#   # For enum type:
+#   values: [value1, value2, value3]
+#   # For ladder type:
+#   ladder: [rank1, rank2, rank3]
+#   # For permission type:
+#   permission-node: "example.permission"
+
+# Example information definitions:
+level:
+  type: int
+  default: 1
+
+coins:
+  type: int
+  default: 0
+
+nickname:
+  type: string
+  default: ""
+
+favorite_color:
+  type: enum
+  default: "blue"
+  values: ["red", "blue", "green", "yellow", "purple", "orange"]
+
+rank:
+  type: ladder
+  default: "member"
+  ladder: ["member", "vip", "premium", "admin"]
+
+home_location:
+  type: string
+  default: ""
+
+total_playtime:
+  type: int
+  default: 0
+
+last_login:
+  type: string
+  default: ""
+
+# You can add more information definitions here
+# The plugin will automatically create database columns for new definitions
+# and handle data type validation based on the type specified

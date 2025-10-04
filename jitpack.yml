@@ -1,0 +1,7 @@
+jdk:
+  - openjdk17
+before_install:
+  - echo "Preparing build environment"
+install:
+  - echo "Running install"
+  - ./gradlew clean build publishToMavenLocal -x test

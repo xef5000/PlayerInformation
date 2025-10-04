@@ -1,0 +1,86 @@
+# Messages Configuration for PlayerInformation Plugin
+
+# General messages
+prefix: "&8[&6PlayerInformation&8]&r "
+no-permission: "&cYou don't have permission to use this command."
+player-not-found: "&cPlayer '{player}' not found."
+player-not-online: "&cPlayer '{player}' is not online."
+invalid-number: "&cInvalid number: {value}"
+invalid-uuid: "&cInvalid UUID: {value}"
+
+# Command messages
+command:
+  usage: "&cUsage: /information <set|get|add|remove|reset|manage|reload>"
+  reload:
+    success: "&aPlayerInformation plugin reloaded successfully!"
+    error: "&cError occurred while reloading the plugin. Check console for details."
+  
+  set:
+    usage: "&cUsage: /information set <player> <data> <value>"
+    success: "&aSet {data} for {player} to {value}"
+    invalid-data: "&cInvalid information type: {data}"
+    invalid-value: "&cInvalid value for {data}: {value}"
+  
+  get:
+    usage: "&cUsage: /information get <player> <data>"
+    result: "&a{player}'s {data}: &f{value}"
+    no-data: "&c{player} has no data for {data}"
+  
+  add:
+    usage: "&cUsage: /information add <player> <data> <value>"
+    success: "&aAdded {value} to {data} for {player}. New value: {new_value}"
+    not-numeric: "&c{data} is not a numeric information type"
+  
+  remove:
+    usage: "&cUsage: /information remove <player> <data> <value>"
+    success: "&aRemoved {value} from {data} for {player}. New value: {new_value}"
+    not-numeric: "&c{data} is not a numeric information type"
+  
+  reset:
+    usage: "&cUsage: /information reset <player> <data>"
+    success: "&aReset {data} for {player} to default value: {value}"
+  
+  manage:
+    usage: "&cUsage: /information manage <player>"
+    opening: "&aOpening management GUI for {player}..."
+
+# GUI messages
+gui:
+  management:
+    title: "Player Information - {player}"
+    no-data: "&7No data available"
+    click-to-edit: "&eClick to edit"
+    current-value: "&7Current: &f{value}"
+  
+  edit:
+    title: "Edit {data}"
+    increase: "&a+1"
+    decrease: "&c-1"
+    increase-10: "&a+10"
+    decrease-10: "&c-10"
+    set-value: "&eSet Value"
+    reset: "&cReset to Default"
+    back: "&7← Back"
+    
+    enum:
+      next: "&aNext Value"
+      previous: "&cPrevious Value"
+    
+    ladder:
+      promote: "&aPromote"
+      demote: "&cDemote"
+
+# Database messages
+database:
+  connecting: "Connecting to database..."
+  connected: "Successfully connected to database"
+  connection-failed: "Failed to connect to database: {error}"
+  table-created: "Created table for information: {table}"
+  migration-complete: "Database migration completed"
+
+# Error messages
+error:
+  config-load: "Failed to load configuration file: {file}"
+  database-error: "Database error occurred: {error}"
+  gui-error: "Error opening GUI: {error}"
+  command-error: "Error executing command: {error}"

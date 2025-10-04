@@ -1,0 +1,28 @@
+name: PlayerInformation
+version: '${version}'
+main: ca.xef5000.playerinformation.PlayerInformation
+api-version: '1.20'
+author: xef5000
+description: A framework to manage player data with customizable information types
+website: https://github.com/xef5000/PlayerInformation
+softdepend: [PlaceholderAPI]
+
+commands:
+  information:
+    description: Main command for PlayerInformation plugin
+    usage: /information <subcommand>
+    aliases: [info, pi]
+
+permissions:
+  playerinformation.admin:
+    description: Full access to PlayerInformation commands
+    default: op
+  playerinformation.manage:
+    description: Access to manage player information
+    default: op
+  playerinformation.view:
+    description: Access to view player information
+    default: op
+  playerinformation.reload:
+    description: Access to reload the plugin
+    default: op

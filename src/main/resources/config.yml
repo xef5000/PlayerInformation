@@ -1,0 +1,54 @@
+# PlayerInformation Plugin Configuration
+
+# Database configuration
+database:
+  # Database type: sqlite or mysql
+  type: sqlite
+  
+  # SQLite configuration (only used if type is sqlite)
+  sqlite:
+    filename: playerdata.db
+  
+  # MySQL configuration (only used if type is mysql)
+  mysql:
+    host: localhost
+    port: 3306
+    database: playerinformation
+    username: root
+    password: ""
+    # Connection pool settings
+    pool:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+# General plugin settings
+settings:
+  # Whether to enable debug logging
+  debug: false
+  
+  # Whether to automatically create missing information definitions
+  auto-create-definitions: false
+  
+  # Default values for new players (if not specified in informations.yml)
+  default-values:
+    enabled: true
+
+# GUI settings
+gui:
+  # Title for the main management GUI
+  management-title: "Player Information - {player}"
+  
+  # Title for data edit GUIs
+  edit-title: "Edit {data} for {player}"
+  
+  # GUI size (must be multiple of 9, max 54)
+  size: 54
+
+# Messages configuration file
+messages-file: messages.yml
+
+# Information definitions file
+informations-file: informations.yml
