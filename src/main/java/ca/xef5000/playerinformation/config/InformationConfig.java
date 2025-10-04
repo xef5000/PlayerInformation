@@ -88,6 +88,7 @@ public class InformationConfig {
         
         // Get type-specific configurations
         List<String> enumValues = null;
+        List<String> multiEnumValues = null;
         List<String> ladderValues = null;
         String permissionNode = null;
         
@@ -102,6 +103,20 @@ public class InformationConfig {
             if (!enumValues.contains(defaultValue)) {
                 plugin.getLogger().warning("Default value '" + defaultValue + "' not in enum values for: " + name);
                 defaultValue = enumValues.get(0);
+            }
+        }
+
+        if (type == InformationType.MULTIENUM) {
+            multiEnumValues = section.getStringList("values");
+            if (multiEnumValues.isEmpty()) {
+                plugin.getLogger().warning("No values specified for multienum information: " + name);
+                return null;
+            }
+
+            // Validate default value is in enum values
+            if (!multiEnumValues.contains(defaultValue)) {
+                plugin.getLogger().warning("Default value '" + defaultValue + "' not in multienum values for: " + name);
+                defaultValue = multiEnumValues.get(0);
             }
         }
         
@@ -134,7 +149,7 @@ public class InformationConfig {
             defaultValue = type.getDefaultValue();
         }
         
-        return new InformationDefinition(name, type, defaultValue, enumValues, ladderValues, permissionNode);
+        return new InformationDefinition(name, type, defaultValue, enumValues, ladderValues, permissionNode, multiEnumValues);
     }
     
     /**

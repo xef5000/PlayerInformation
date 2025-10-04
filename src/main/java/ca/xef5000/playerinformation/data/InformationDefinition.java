@@ -1,5 +1,7 @@
 package ca.xef5000.playerinformation.data;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -13,19 +15,23 @@ public class InformationDefinition {
     private final List<String> enumValues;
     private final List<String> ladderValues;
     private final String permissionNode;
-    
-    public InformationDefinition(String name, InformationType type, String defaultValue) {
-        this(name, type, defaultValue, null, null, null);
+    private final List<String> multiEnumValues;
+
+    public InformationDefinition(String name, InformationType type, String defaultValue,
+                                 List<String> enumValues, List<String> ladderValues, String permissionNode) {
+        this(name, type, defaultValue, enumValues, ladderValues, permissionNode, null);
     }
-    
-    public InformationDefinition(String name, InformationType type, String defaultValue, 
-                               List<String> enumValues, List<String> ladderValues, String permissionNode) {
+
+    public InformationDefinition(String name, InformationType type, String defaultValue,
+                                 List<String> enumValues, List<String> ladderValues,
+                                 String permissionNode, List<String> multiEnumValues) {
         this.name = name;
         this.type = type;
         this.defaultValue = defaultValue != null ? defaultValue : type.getDefaultValue();
         this.enumValues = enumValues;
         this.ladderValues = ladderValues;
         this.permissionNode = permissionNode;
+        this.multiEnumValues = multiEnumValues;
     }
     
     /**
@@ -74,6 +80,65 @@ public class InformationDefinition {
      */
     public String getPermissionNode() {
         return permissionNode;
+    }
+
+    /**
+     * Get the multi-enum values (only applicable for MULTIENUM type)
+     * @return List of multi-enum values, or null if not a multi-enum type
+     */
+    public List<String> getMultiEnumValues() {
+        return multiEnumValues;
+    }
+
+    /**
+     * Parse multi-enum value string into list
+     * @param value Comma-separated value string
+     * @return List of selected values
+     */
+    public List<String> parseMultiEnumValue(String value) {
+        if (value == null || value.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return Arrays.asList(value.split(","));
+    }
+
+    /**
+     * Format multi-enum values into storage string
+     * @param values List of selected values
+     * @return Comma-separated string
+     */
+    public String formatMultiEnumValue(List<String> values) {
+        if (values == null || values.isEmpty()) {
+            return "";
+        }
+        return String.join(",", values);
+    }
+
+    /**
+     * Check if a value is selected in multi-enum
+     * @param currentValue Current multi-enum value
+     * @param checkValue Value to check
+     * @return true if selected
+     */
+    public boolean isMultiEnumValueSelected(String currentValue, String checkValue) {
+        List<String> selected = parseMultiEnumValue(currentValue);
+        return selected.contains(checkValue);
+    }
+
+    /**
+     * Toggle a value in multi-enum
+     * @param currentValue Current multi-enum value
+     * @param toggleValue Value to toggle
+     * @return New multi-enum value
+     */
+    public String toggleMultiEnumValue(String currentValue, String toggleValue) {
+        List<String> selected = new ArrayList<>(parseMultiEnumValue(currentValue));
+        if (selected.contains(toggleValue)) {
+            selected.remove(toggleValue);
+        } else {
+            selected.add(toggleValue);
+        }
+        return formatMultiEnumValue(selected);
     }
     
     /**

@@ -116,6 +116,14 @@ public class ManagementGUI {
                         lore.add(colorize("&7Permission: &f" + definition.getPermissionNode()));
                     }
                     break;
+                case MULTIENUM:
+                    if (definition.getMultiEnumValues() != null) {
+                        List<String> selected = definition.parseMultiEnumValue(currentValue);
+                        lore.add(colorize("&7Options: &f" + String.join(", ", definition.getMultiEnumValues())));
+                        lore.add(colorize("&7Selected: &f" + (selected.isEmpty() ? "None" : String.join(", ", selected))));
+                    }
+                    break;
+
             }
             
             lore.add("");
@@ -151,6 +159,8 @@ public class ManagementGUI {
                 return Material.NAME_TAG;
             case ENUM:
                 return Material.COMPASS;
+            case MULTIENUM:
+                return Material.ITEM_FRAME;
             case LADDER:
                 return Material.LADDER;
             case PERMISSION:

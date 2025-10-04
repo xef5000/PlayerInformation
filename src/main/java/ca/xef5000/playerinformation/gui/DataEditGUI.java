@@ -63,6 +63,9 @@ public class DataEditGUI {
             case ENUM:
                 createEnumEditItems(gui, pane, viewer, targetPlayerUuid, targetPlayerName, definition, currentValue, backCallback);
                 break;
+            case MULTIENUM:
+                createMultiEnumEditItems(gui, pane, viewer, targetPlayerUuid, targetPlayerName, definition, currentValue, backCallback);
+                break;
             case LADDER:
                 createLadderEditItems(pane, viewer, targetPlayerUuid, targetPlayerName, definition, currentValue, backCallback);
                 break;
@@ -228,6 +231,94 @@ public class DataEditGUI {
         gui.addPane(navPane);
     }
 
+    /**
+     * Create edit items for multi-enum type
+     */
+    private void createMultiEnumEditItems(ChestGui gui, OutlinePane topPane, Player viewer,
+                                          UUID targetPlayerUuid, String targetPlayerName,
+                                          InformationDefinition definition, String currentValue,
+                                          Runnable backCallback) {
+
+        List<String> multiEnumValues = definition.getMultiEnumValues();
+        if (multiEnumValues == null || multiEnumValues.isEmpty()) {
+            return;
+        }
+
+        List<String> selectedValues = definition.parseMultiEnumValue(currentValue);
+
+        // --- TOP SECTION (info display) ---
+        topPane.addItem(createDisplayItem(Material.ITEM_FRAME, "&e" + definition.getName(),
+                "&7Selected: &f" + (selectedValues.isEmpty() ? "None" : String.join(", ", selectedValues)),
+                "&7Count: &f" + selectedValues.size() + "/" + multiEnumValues.size(),
+                "&7Options: &f" + String.join(", ", multiEnumValues)));
+
+        // Clear all button
+        topPane.addItem(createActionItem(Material.BARRIER, "&cClear All",
+                "Click to deselect all", () -> {
+                    updateValue(viewer, targetPlayerUuid, targetPlayerName,
+                            definition, "", backCallback);
+                }));
+
+        // Select all button
+        topPane.addItem(createActionItem(Material.EMERALD, "&aSelect All",
+                "Click to select all", () -> {
+                    String allSelected = definition.formatMultiEnumValue(multiEnumValues);
+                    updateValue(viewer, targetPlayerUuid, targetPlayerName,
+                            definition, allSelected, backCallback);
+                }));
+
+        // --- BOTTOM SECTION (paginated list) ---
+        PaginatedPane enumPane = new PaginatedPane(0, 2, 9, 1);
+        int itemsPerPage = 7;
+
+        int totalPages = (int) Math.ceil(multiEnumValues.size() / (double) itemsPerPage);
+
+        for (int page = 0; page < totalPages; page++) {
+            OutlinePane pagePane = new OutlinePane(1, 0, 7, 1);
+
+            int start = page * itemsPerPage;
+            int end = Math.min(start + itemsPerPage, multiEnumValues.size());
+
+            for (int i = start; i < end; i++) {
+                String value = multiEnumValues.get(i);
+                boolean isSelected = selectedValues.contains(value);
+
+                Material mat = isSelected ? Material.LIME_DYE : Material.GRAY_DYE;
+                String display = (isSelected ? "&a✓ " : "&7") + value;
+
+                pagePane.addItem(createActionItem(mat, display,
+                        isSelected ? "Click to deselect" : "Click to select", () -> {
+                            String newValue = definition.toggleMultiEnumValue(currentValue, value);
+                            updateValue(viewer, targetPlayerUuid, targetPlayerName,
+                                    definition, newValue, backCallback);
+                        }));
+            }
+
+            enumPane.addPane(page, pagePane);
+        }
+
+        // --- Add navigation buttons ---
+        GuiItem previousPage = createActionItem(Material.ARROW, "&cPrevious Page", "Go to previous page", () -> {
+            if (enumPane.getPage() > 0) {
+                enumPane.setPage(enumPane.getPage() - 1);
+                gui.update();
+            }
+        });
+
+        GuiItem nextPage = createActionItem(Material.ARROW, "&aNext Page", "Go to next page", () -> {
+            if (enumPane.getPage() < totalPages - 1) {
+                enumPane.setPage(enumPane.getPage() + 1);
+                gui.update();
+            }
+        });
+
+        OutlinePane navPane = new OutlinePane(0, 2, 9, 1);
+        navPane.addItem(previousPage);
+        navPane.addItem(nextPage);
+
+        gui.addPane(enumPane);
+        gui.addPane(navPane);
+    }
 
     /**
      * Create edit items for ladder type

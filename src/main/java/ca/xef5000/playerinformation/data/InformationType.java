@@ -25,6 +25,11 @@ public enum InformationType {
      * Enum values - predefined set of options
      */
     ENUM("TEXT"),
+
+    /**
+     * MultiEnum values - can select multiple from predefined set of options
+     */
+    MULTIENUM("TEXT"),
     
     /**
      * Ladder values - hierarchical ranking system
@@ -82,6 +87,18 @@ public enum InformationType {
             case ENUM:
                 return definition.getEnumValues() != null && 
                        definition.getEnumValues().contains(value);
+
+            case MULTIENUM:
+                if (value.isEmpty()) return true; // Empty is valid (no selections)
+                if (definition.getMultiEnumValues() == null) return false;
+
+                String[] selectedValues = value.split(",");
+                for (String selected : selectedValues) {
+                    if (!definition.getMultiEnumValues().contains(selected.trim())) {
+                        return false;
+                    }
+                }
+                return true;
             
             case LADDER:
                 return definition.getLadderValues() != null && 
@@ -109,6 +126,7 @@ public enum InformationType {
             case STRING:
             case ENUM:
             case LADDER:
+            case MULTIENUM:
                 return value;
             case UUID:
                 return java.util.UUID.fromString(value);
@@ -130,6 +148,7 @@ public enum InformationType {
             case STRING:
             case ENUM:
             case LADDER:
+            case MULTIENUM:
                 return "";
             case UUID:
                 return java.util.UUID.randomUUID().toString();
