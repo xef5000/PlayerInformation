@@ -42,9 +42,9 @@ tasks.build {
 }
 
 shadowJar {
+    archiveClassifier.set('')
     relocate 'com.github.stefvanschie.inventoryframework', 'ca.xef5000.playerinformation.libs.inventoryframework'
     relocate 'com.zaxxer.hikari', 'ca.xef5000.playerinformation.libs.hikari'
-   // relocate 'org.sqlite', 'ca.xef5000.playerinformation.libs.sqlite'
     relocate 'com.mysql', 'ca.xef5000.playerinformation.libs.mysql'
 }
 
