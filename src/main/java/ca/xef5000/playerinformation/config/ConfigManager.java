@@ -1,11 +1,16 @@
 package ca.xef5000.playerinformation.config;
 
 import ca.xef5000.playerinformation.PlayerInformation;
+import ca.xef5000.playerinformation.data.InformationType;
+import com.github.xef5000.itemsapi.ItemsAPI;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.Material;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.logging.Level;
 
 /**
@@ -267,12 +272,20 @@ public class ConfigManager {
     public String getGuiEditTitle() {
         return config.getString("gui.edit-title", "Edit {data} for {player}");
     }
-    
+
     /**
-     * Get GUI size
-     * @return GUI size
+     * Get an ItemStack to use for displaying an information type in GUIs.
+     * Reads configuration section 'display-items.<type>' and falls back to a simple material mapping.
+     * This will support a simple 'material' key (e.g. GOLD_NUGGET) and basic item meta (display name/lore) if present.
      */
-    public int getGuiSize() {
-        return config.getInt("gui.size", 54);
+    public ItemStack getDisplayItem(InformationType type) {
+        if (config == null) return new ItemStack(Material.PAPER);
+
+        String path = "display-items." + type.name().toLowerCase();
+        ConfigurationSection section = config.getConfigurationSection(path);
+
+
+        assert section != null;
+        return ItemsAPI.fromConfiguration(section);
     }
 }

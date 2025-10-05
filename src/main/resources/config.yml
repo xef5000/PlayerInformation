@@ -47,6 +47,22 @@ gui:
   # GUI size (must be multiple of 9, max 54)
   size: 54
 
+display-items:
+  int:
+    material: GOLD_NUGGET
+  string:
+    material: PAPER
+  uuid:
+    material: NAME_TAG
+  enum:
+    material: COMPASS
+  multienum:
+    material: ITEM_FRAME
+  ladder:
+    material: LADDER
+  permission:
+    material: REDSTONE_TORCH
+
 # Messages configuration file
 messages-file: messages.yml
 

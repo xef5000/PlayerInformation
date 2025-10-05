@@ -17,6 +17,7 @@ repositories {
     maven {
         url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
     }
+    maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -26,6 +27,7 @@ dependencies {
     implementation 'com.zaxxer:HikariCP:5.1.0'
     implementation 'org.xerial:sqlite-jdbc:3.44.1.0'
     implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'com.github.xef5000:ItemsAPI:1.1.2a'
 }
 
 tasks {
@@ -44,6 +46,7 @@ tasks.build {
 shadowJar {
     archiveClassifier.set('')
     relocate 'com.github.stefvanschie.inventoryframework', 'ca.xef5000.playerinformation.libs.inventoryframework'
+    relocate "com.github.xef5000.itemsapi", "ca.xef5000.playerinformation.libs.itemsapi"
     relocate 'com.zaxxer.hikari', 'ca.xef5000.playerinformation.libs.hikari'
     relocate 'com.mysql', 'ca.xef5000.playerinformation.libs.mysql'
 }

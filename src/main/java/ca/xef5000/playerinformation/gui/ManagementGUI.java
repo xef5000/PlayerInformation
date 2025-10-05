@@ -86,90 +86,69 @@ public class ManagementGUI {
     private GuiItem createInformationItem(InformationDefinition definition, String currentValue, 
                                         Player viewer, UUID targetPlayerUuid, String targetPlayerName) {
         
-        Material material = getInformationMaterial(definition.getType());
-        ItemStack item = new ItemStack(material);
+        // Use configured display item if available
+        ItemStack item = configManager.getDisplayItem(definition.getType());
         ItemMeta meta = item.getItemMeta();
         
         if (meta != null) {
+            // Override the display name to show the information name
             meta.setDisplayName(colorize("&e" + definition.getName()));
-            
-            List<String> lore = new ArrayList<>();
+
+            // Start with any lore provided by the configured item
+            List<String> lore = meta.getLore() != null ? new ArrayList<>(meta.getLore()) : new ArrayList<>();
+            // Append type/current/default info
             lore.add(colorize("&7Type: &f" + definition.getType().name()));
             lore.add(colorize("&7Current: &f" + currentValue));
             lore.add(colorize("&7Default: &f" + definition.getDefaultValue()));
             lore.add("");
-            
-            // Add type-specific information
-            switch (definition.getType()) {
-                case ENUM:
-                    if (definition.getEnumValues() != null) {
-                        lore.add(colorize("&7Values: &f" + String.join(", ", definition.getEnumValues())));
-                    }
-                    break;
-                case LADDER:
-                    if (definition.getLadderValues() != null) {
-                        lore.add(colorize("&7Ladder: &f" + String.join(" → ", definition.getLadderValues())));
-                    }
-                    break;
-                case PERMISSION:
-                    if (definition.getPermissionNode() != null) {
-                        lore.add(colorize("&7Permission: &f" + definition.getPermissionNode()));
-                    }
-                    break;
-                case MULTIENUM:
-                    if (definition.getMultiEnumValues() != null) {
-                        List<String> selected = definition.parseMultiEnumValue(currentValue);
-                        lore.add(colorize("&7Options: &f" + String.join(", ", definition.getMultiEnumValues())));
-                        lore.add(colorize("&7Selected: &f" + (selected.isEmpty() ? "None" : String.join(", ", selected))));
-                    }
-                    break;
 
-            }
-            
-            lore.add("");
-            lore.add(colorize("&eClick to edit"));
-            
-            meta.setLore(lore);
-            item.setItemMeta(meta);
-        }
+             // Add type-specific information
+             switch (definition.getType()) {
+                 case ENUM:
+                     if (definition.getEnumValues() != null) {
+                         lore.add(colorize("&7Values: &f" + String.join(", ", definition.getEnumValues())));
+                     }
+                     break;
+                 case LADDER:
+                     if (definition.getLadderValues() != null) {
+                         lore.add(colorize("&7Ladder: &f" + String.join(" → ", definition.getLadderValues())));
+                     }
+                     break;
+                 case PERMISSION:
+                     if (definition.getPermissionNode() != null) {
+                         lore.add(colorize("&7Permission: &f" + definition.getPermissionNode()));
+                     }
+                     break;
+                 case MULTIENUM:
+                     if (definition.getMultiEnumValues() != null) {
+                         List<String> selected = definition.parseMultiEnumValue(currentValue);
+                         lore.add(colorize("&7Options: &f" + String.join(", ", definition.getMultiEnumValues())));
+                         lore.add(colorize("&7Selected: &f" + (selected.isEmpty() ? "None" : String.join(", ", selected))));
+                     }
+                     break;
 
-        return new GuiItem(item, event -> {
-            event.setCancelled(true);
+             }
 
-            // Open edit GUI
-            DataEditGUI editGUI = new DataEditGUI(plugin, configManager, informationConfig, dataRepository);
-            editGUI.openEditGUI(viewer, targetPlayerUuid, targetPlayerName, definition, currentValue, () -> {
-                // Reopen management GUI safely one tick later
-                plugin.getServer().getScheduler().runTaskLater(plugin, () ->
-                        openManagementGUI(viewer, targetPlayerUuid, targetPlayerName), 1L);
-            });
-        });
-    }
-    
-    /**
-     * Get appropriate material for information type
-     */
-    private Material getInformationMaterial(InformationType type) {
-        switch (type) {
-            case INT:
-                return Material.GOLD_NUGGET;
-            case STRING:
-                return Material.PAPER;
-            case UUID:
-                return Material.NAME_TAG;
-            case ENUM:
-                return Material.COMPASS;
-            case MULTIENUM:
-                return Material.ITEM_FRAME;
-            case LADDER:
-                return Material.LADDER;
-            case PERMISSION:
-                return Material.REDSTONE_TORCH;
-            default:
-                return Material.STONE;
-        }
-    }
-    
+             lore.add("");
+             lore.add(colorize("&eClick to edit"));
+
+             meta.setLore(lore);
+             item.setItemMeta(meta);
+         }
+
+         return new GuiItem(item, event -> {
+             event.setCancelled(true);
+
+             // Open edit GUI
+             DataEditGUI editGUI = new DataEditGUI(plugin, configManager, informationConfig, dataRepository);
+             editGUI.openEditGUI(viewer, targetPlayerUuid, targetPlayerName, definition, currentValue, () -> {
+                 // Reopen management GUI safely one tick later
+                 plugin.getServer().getScheduler().runTaskLater(plugin, () ->
+                         openManagementGUI(viewer, targetPlayerUuid, targetPlayerName), 1L);
+             });
+         });
+     }
+
     /**
      * Convert color codes to Minecraft colors
      */
