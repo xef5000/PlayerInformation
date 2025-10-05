@@ -7,6 +7,7 @@ import ca.xef5000.playerinformation.commands.InformationTabCompleter;
 import ca.xef5000.playerinformation.config.ConfigManager;
 import ca.xef5000.playerinformation.database.PlayerDataRepository;
 import ca.xef5000.playerinformation.listeners.PlayerJoinQuitListener;
+import ca.xef5000.playerinformation.listeners.ChatInputListener;
 import ca.xef5000.playerinformation.placeholders.PlayerInformationExpansion;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
@@ -21,6 +22,7 @@ public final class PlayerInformation extends JavaPlugin {
     private PlayerDataRepository dataRepository;
     private PlayerInformationAPI api;
     private PlayerInformationExpansion placeholderExpansion;
+    private ChatInputListener chatInputListener;
 
     @Override
     public void onEnable() {
@@ -104,6 +106,17 @@ public final class PlayerInformation extends JavaPlugin {
     private void registerListeners() {
         PlayerJoinQuitListener joinQuitListener = new PlayerJoinQuitListener(this, dataRepository);
         Bukkit.getPluginManager().registerEvents(joinQuitListener, this);
+
+        // Chat input listener for GUI string inputs
+        chatInputListener = new ChatInputListener(this, dataRepository);
+        Bukkit.getPluginManager().registerEvents(chatInputListener, this);
+    }
+
+    /**
+     * Get the chat input listener (used by GUIs to prompt for chat input)
+     */
+    public ChatInputListener getChatInputListener() {
+        return chatInputListener;
     }
 
     /**

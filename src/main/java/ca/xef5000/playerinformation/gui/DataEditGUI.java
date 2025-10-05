@@ -6,6 +6,7 @@ import ca.xef5000.playerinformation.config.InformationConfig;
 import ca.xef5000.playerinformation.data.InformationDefinition;
 import ca.xef5000.playerinformation.data.InformationType;
 import ca.xef5000.playerinformation.database.PlayerDataRepository;
+import ca.xef5000.playerinformation.listeners.ChatInputListener;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
@@ -28,13 +29,15 @@ public class DataEditGUI {
     private final ConfigManager configManager;
     private final InformationConfig informationConfig;
     private final PlayerDataRepository dataRepository;
-    
+    private final ChatInputListener chatInputListener;
+
     public DataEditGUI(PlayerInformation plugin, ConfigManager configManager, 
                       InformationConfig informationConfig, PlayerDataRepository dataRepository) {
         this.plugin = plugin;
         this.configManager = configManager;
         this.informationConfig = informationConfig;
         this.dataRepository = dataRepository;
+        this.chatInputListener = plugin.getChatInputListener();
     }
     
     /**
@@ -131,22 +134,25 @@ public class DataEditGUI {
                                      InformationDefinition definition, String currentValue, Runnable backCallback) {
         
         // Current value display
-        pane.addItem(createDisplayItem(Material.PAPER, "&e" + definition.getName(), 
+        pane.addItem(createDisplayItem(Material.PAPER, "&e" + definition.getName(),
             "&7Current value: &f" + currentValue,
             "&7Type: &f" + definition.getType().name(),
             "&eUse chat to set new value"));
         
         // Set value button (opens chat input)
-        pane.addItem(createActionItem(Material.WRITABLE_BOOK, "&eSet Value", 
+        pane.addItem(createActionItem(Material.WRITABLE_BOOK, "&eSet Value",
             "Click and type in chat", () -> {
-                viewer.closeInventory();
-                viewer.sendMessage(colorize("&eType the new value for &f" + definition.getName() + "&e in chat:"));
-                // Note: In a real implementation, you'd need to handle chat input
-                // This would require a chat listener system
+                // Use chat input listener to prompt the viewer. Provide callbacks to reopen GUIs.
+                chatInputListener.promptForInput(viewer, targetPlayerUuid, targetPlayerName, definition,
+                    // onComplete -> reopen edit GUI with new value
+                    newValue -> openEditGUI(viewer, targetPlayerUuid, targetPlayerName, definition, newValue, backCallback),
+                    // onCancel -> reopen edit GUI with old value
+                    () -> openEditGUI(viewer, targetPlayerUuid, targetPlayerName, definition, currentValue, backCallback)
+                );
             }));
         
         // Reset button
-        pane.addItem(createActionItem(Material.BARRIER, "&cReset", 
+        pane.addItem(createActionItem(Material.BARRIER, "&cReset",
             "Click to reset to default", () -> {
                 updateValue(viewer, targetPlayerUuid, targetPlayerName, definition, definition.getDefaultValue(), backCallback);
             }));
