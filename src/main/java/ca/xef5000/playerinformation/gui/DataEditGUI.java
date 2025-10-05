@@ -9,6 +9,7 @@ import ca.xef5000.playerinformation.database.PlayerDataRepository;
 import ca.xef5000.playerinformation.listeners.ChatInputListener;
 import com.github.stefvanschie.inventoryframework.gui.GuiItem;
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui;
+import com.github.stefvanschie.inventoryframework.pane.Orientable;
 import com.github.stefvanschie.inventoryframework.pane.OutlinePane;
 import com.github.stefvanschie.inventoryframework.pane.PaginatedPane;
 import com.github.stefvanschie.inventoryframework.pane.Pane;
@@ -16,6 +17,7 @@ import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,12 +41,17 @@ public class DataEditGUI {
         this.dataRepository = dataRepository;
         this.chatInputListener = plugin.getChatInputListener();
     }
-    
+
+    public void openEditGUI(Player viewer, UUID targetPlayerUuid, String targetPlayerName,
+                            InformationDefinition definition, String currentValue, Runnable backCallback) {
+        openEditGUI(viewer, targetPlayerUuid, targetPlayerName, definition, currentValue, backCallback, 0);
+    }
+
     /**
      * Open the edit GUI for a specific information
      */
     public void openEditGUI(Player viewer, UUID targetPlayerUuid, String targetPlayerName, 
-                           InformationDefinition definition, String currentValue, Runnable backCallback) {
+                           InformationDefinition definition, String currentValue, Runnable backCallback, int page) {
         
         String title = configManager.getGuiEditTitle()
                 .replace("{data}", definition.getName())
@@ -64,10 +71,10 @@ public class DataEditGUI {
                 createStringEditItems(pane, viewer, targetPlayerUuid, targetPlayerName, definition, currentValue, backCallback);
                 break;
             case ENUM:
-                createEnumEditItems(gui, pane, viewer, targetPlayerUuid, targetPlayerName, definition, currentValue, backCallback);
+                createEnumEditItems(gui, pane, viewer, targetPlayerUuid, targetPlayerName, definition, currentValue, backCallback, page);
                 break;
             case MULTIENUM:
-                createMultiEnumEditItems(gui, pane, viewer, targetPlayerUuid, targetPlayerName, definition, currentValue, backCallback);
+                createMultiEnumEditItems(gui, pane, viewer, targetPlayerUuid, targetPlayerName, definition, currentValue, backCallback, page);
                 break;
             case LADDER:
                 createLadderEditItems(pane, viewer, targetPlayerUuid, targetPlayerName, definition, currentValue, backCallback);
@@ -164,7 +171,7 @@ public class DataEditGUI {
     private void createEnumEditItems(ChestGui gui, OutlinePane topPane, Player viewer,
                                      UUID targetPlayerUuid, String targetPlayerName,
                                      InformationDefinition definition, String currentValue,
-                                     Runnable backCallback) {
+                                     Runnable backCallback, int startingPage) {
 
         List<String> enumValues = definition.getEnumValues();
         if (enumValues == null || enumValues.isEmpty()) {
@@ -186,13 +193,13 @@ public class DataEditGUI {
                 }));
 
         // --- BOTTOM SECTION (paginated list) ---
-        PaginatedPane enumPane = new PaginatedPane(0, 2, 9, 1); // row 3 (0-indexed)
-        int itemsPerPage = 7;
+        PaginatedPane enumPane = new PaginatedPane(0, 1, 9, 2); // row 2 (0-indexed)
+        int itemsPerPage = 16;
 
         int totalPages = (int) Math.ceil(enumValues.size() / (double) itemsPerPage);
 
         for (int page = 0; page < totalPages; page++) {
-            OutlinePane pagePane = new OutlinePane(1, 0, 7, 1); // middle 7 slots
+            OutlinePane pagePane = new OutlinePane(1, 0, 8, 2); // right 8 slots
 
             int start = page * itemsPerPage;
             int end = Math.min(start + itemsPerPage, enumValues.size());
@@ -207,12 +214,21 @@ public class DataEditGUI {
                 pagePane.addItem(createActionItem(mat, display,
                         isCurrent ? "Current value" : "Click to set this value", () -> {
                             updateValue(viewer, targetPlayerUuid, targetPlayerName,
-                                    definition, value, backCallback);
+                                    definition, value, backCallback, enumPane.getPage());
                         }));
             }
 
             enumPane.addPane(page, pagePane);
         }
+        OutlinePane navPane = createNavigation(gui, startingPage, enumPane, totalPages);
+        navPane.setOrientation(Orientable.Orientation.VERTICAL);
+
+        gui.addPane(enumPane);
+        gui.addPane(navPane);
+    }
+
+    private @NotNull OutlinePane createNavigation(ChestGui gui, int startingPage, PaginatedPane enumPane, int totalPages) {
+        enumPane.setPage(startingPage);
 
         // --- Add navigation buttons ---
         GuiItem previousPage = createActionItem(Material.ARROW, "&cPrevious Page", "Go to previous page", () -> {
@@ -229,12 +245,10 @@ public class DataEditGUI {
             }
         });
 
-        OutlinePane navPane = new OutlinePane(0, 2, 9, 1);
+        OutlinePane navPane = new OutlinePane(0, 1, 1, 2);
         navPane.addItem(previousPage);
         navPane.addItem(nextPage);
-
-        gui.addPane(enumPane);
-        gui.addPane(navPane);
+        return navPane;
     }
 
     /**
@@ -243,7 +257,7 @@ public class DataEditGUI {
     private void createMultiEnumEditItems(ChestGui gui, OutlinePane topPane, Player viewer,
                                           UUID targetPlayerUuid, String targetPlayerName,
                                           InformationDefinition definition, String currentValue,
-                                          Runnable backCallback) {
+                                          Runnable backCallback, int startingPage) {
 
         List<String> multiEnumValues = definition.getMultiEnumValues();
         if (multiEnumValues == null || multiEnumValues.isEmpty()) {
@@ -274,13 +288,13 @@ public class DataEditGUI {
                 }));
 
         // --- BOTTOM SECTION (paginated list) ---
-        PaginatedPane enumPane = new PaginatedPane(0, 2, 9, 1);
-        int itemsPerPage = 7;
+        PaginatedPane enumPane = new PaginatedPane(0, 1, 9, 2);
+        int itemsPerPage = 16;
 
         int totalPages = (int) Math.ceil(multiEnumValues.size() / (double) itemsPerPage);
 
         for (int page = 0; page < totalPages; page++) {
-            OutlinePane pagePane = new OutlinePane(1, 0, 7, 1);
+            OutlinePane pagePane = new OutlinePane(1, 0, 8, 2);
 
             int start = page * itemsPerPage;
             int end = Math.min(start + itemsPerPage, multiEnumValues.size());
@@ -296,31 +310,14 @@ public class DataEditGUI {
                         isSelected ? "Click to deselect" : "Click to select", () -> {
                             String newValue = definition.toggleMultiEnumValue(currentValue, value);
                             updateValue(viewer, targetPlayerUuid, targetPlayerName,
-                                    definition, newValue, backCallback);
+                                    definition, newValue, backCallback, enumPane.getPage());
                         }));
             }
 
             enumPane.addPane(page, pagePane);
         }
 
-        // --- Add navigation buttons ---
-        GuiItem previousPage = createActionItem(Material.ARROW, "&cPrevious Page", "Go to previous page", () -> {
-            if (enumPane.getPage() > 0) {
-                enumPane.setPage(enumPane.getPage() - 1);
-                gui.update();
-            }
-        });
-
-        GuiItem nextPage = createActionItem(Material.ARROW, "&aNext Page", "Go to next page", () -> {
-            if (enumPane.getPage() < totalPages - 1) {
-                enumPane.setPage(enumPane.getPage() + 1);
-                gui.update();
-            }
-        });
-
-        OutlinePane navPane = new OutlinePane(0, 2, 9, 1);
-        navPane.addItem(previousPage);
-        navPane.addItem(nextPage);
+        OutlinePane navPane = createNavigation(gui, startingPage, enumPane, totalPages);
 
         gui.addPane(enumPane);
         gui.addPane(navPane);
@@ -448,12 +445,17 @@ public class DataEditGUI {
         
         return new GuiItem(item, event -> event.setCancelled(true));
     }
+
+    private void updateValue(Player viewer, UUID targetPlayerUuid, String targetPlayerName,
+                     InformationDefinition definition, String newValue, Runnable backCallback) {
+        updateValue(viewer, targetPlayerUuid, targetPlayerName, definition, newValue, backCallback, 0);
+    }
     
     /**
      * Update a value and refresh the GUI
      */
     private void updateValue(Player viewer, UUID targetPlayerUuid, String targetPlayerName, 
-                           InformationDefinition definition, String newValue, Runnable backCallback) {
+                           InformationDefinition definition, String newValue, Runnable backCallback, int page) {
         
         dataRepository.setPlayerInformation(targetPlayerUuid, targetPlayerName, definition.getName(), newValue)
             .thenAccept(success -> {
@@ -461,7 +463,7 @@ public class DataEditGUI {
                     viewer.sendMessage(colorize("&aUpdated " + definition.getName() + " to " + newValue));
                     // Refresh the edit GUI
                     plugin.getServer().getScheduler().runTask(plugin, () -> {
-                        openEditGUI(viewer, targetPlayerUuid, targetPlayerName, definition, newValue, backCallback);
+                        openEditGUI(viewer, targetPlayerUuid, targetPlayerName, definition, newValue, backCallback, page);
                     });
                 } else {
                     viewer.sendMessage(colorize("&cFailed to update " + definition.getName()));
